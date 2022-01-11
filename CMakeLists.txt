@@ -7,7 +7,7 @@ include_directories(".")
 add_executable(meshReader
   main.cc)
 
-set_target_properties(isosurface
+set_target_properties(meshReader
   PROPERTIES
   COMPILE_FLAGS
   "-g -Wall -Werror -Wextra -Wshadow -Wunreachable-code -Wuninitialized -Wduplicated-cond -Wduplicated-branches -Wpedantic -m64 -I /usr/include -O3")
