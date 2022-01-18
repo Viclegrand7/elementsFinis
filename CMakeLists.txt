@@ -5,11 +5,13 @@ project(meshReader)
 include_directories(".")
 
 add_executable(meshReader
-  main.cc)
+  main.cc
+  mesh.cc
+  triangle.cc)
 
 set_target_properties(meshReader
   PROPERTIES
   COMPILE_FLAGS
-  "-g -Wall -Werror -Wextra -Wshadow -Wunreachable-code -Wuninitialized -Wduplicated-cond -Wduplicated-branches -Wpedantic -m64 -I /usr/include -O3")
+  "-g -Wall -Werror -Wextra -Wshadow -Wunreachable-code -Wuninitialized -Wduplicated-cond -Wduplicated-branches -Wpedantic -m64 -O3")
 
 install(TARGETS meshReader RUNTIME DESTINATION bin)

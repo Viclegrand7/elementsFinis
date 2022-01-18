@@ -6,6 +6,9 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <eigen3/Eigen/Sparse>
+#include <eigen3/Eigen/Dense>
+
 #include "point.hh"
 #include "triangle.hh"
 
@@ -13,11 +16,13 @@ class Mesh {
 	std :: vector <Point *> att_pointList;
 	std :: vector <Triangle *> att_triangleList;
 	size_t att_freedomDegrees;
-	//SparseMatrix <double> *att_A;
-	//SparseMatrix <double> *att_F;
+	Eigen :: SparseMatrix <double> *att_A;
+	Eigen :: VectorXd *att_F;
+	Eigen :: VectorXd *att_X;
 public:
 	Mesh(std::string filename);
-	double **assemble(); //x and *x will need to be freed
+	~Mesh(); //delete each Point *
+	void assemble();
 };
 
 #endif /* BV_TD_MESH_HH */

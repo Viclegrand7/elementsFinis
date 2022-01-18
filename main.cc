@@ -6,6 +6,7 @@
 
 
 long long Point :: globalId = 0;
+long long Point :: globalDdl = 0;
 
 
 
