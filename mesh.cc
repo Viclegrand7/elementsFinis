@@ -13,6 +13,10 @@ std::vector<std::string> split (const std::string &s, char delim) {
 }
 
 double **Mesh :: assemble() {
+	for (int i=0; i<att_triangleList.size(); ++i)
+	{
+		std::cout<<*att_triangleList[i]<<std::endl;
+	}
 	return NULL;
 }
 
@@ -74,10 +78,10 @@ Mesh::Mesh(std::string filename)
 	int i_max  = stoi(val[3]);
 
 
-	for (int i = i_init; i < i_max; ++i)
+	for (int i = i_init; i <= i_max; ++i)
 	{
 		getline(input_stream, line);
 		val = split(line, ' ');
-		att_triangleList.push_back(new Triangle(att_pointList[stoi(val[1])], att_pointList[stoi(val[2])], att_pointList[stoi(val[3])]));
+		att_triangleList.push_back(new Triangle(att_pointList[stoi(val[1])-1], att_pointList[stoi(val[2])-1], att_pointList[stoi(val[3])-1]));
 	}
 }
