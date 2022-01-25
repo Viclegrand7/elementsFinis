@@ -15,50 +15,53 @@ std :: vector<std :: string> split (const std :: string &s, char delim) {
 
     return result;
 }
+
 void Mesh :: VTKExport(const string &fileName){
-  Timer t;
-  vtkUnstructuredGrid *Grid                 = vtkUnstructuredGrid::New();
-  vtkPoints *pointSet                       = vtkPoints::New();
-  vtkDoubleArray *wtfIsThis                 = vtkDoubleArray::New();
-  vtkXMLUnstructuredGridWriter* outputFile  = vtkXMLUnstructuredGridWriter::New();
+	unsigned int dimension_ = 2;
+	Timer t;
+	vtkUnstructuredGrid *Grid                 = vtkUnstructuredGrid::New();
+	vtkPoints *pointSet                       = vtkPoints::New();
+	vtkDoubleArray *wtfIsThis                 = vtkDoubleArray::New();
+	vtkXMLUnstructuredGridWriter* outputFile  = vtkXMLUnstructuredGridWriter::New();
 
-  wtfIsThis->SetNumberOfComponents(1);
-  wtfIsThis->SetNumberOfTuples(att_triangleList.size());
+	wtfIsThis->SetNumberOfComponents(1);
+	wtfIsThis->SetNumberOfTuples(att_triangleList.size());
 
-  for (unsigned int i = 0; i < att_freedomDegrees; ++i)
-  {
-    pointSet->InsertNextPoint(att_X(i));
-    wtfIsThis->SetTuple(i, vertexData_[i].data() + 3);
-  }
+	for (unsigned int i = 0; i < att_pointList.size(); ++i)
+	{
+		double value = 0.0;
+		long long ddl = att_pointList[i].getDdl();
+		if (ddl != -1)
+			value = att_X(ddl);
+		double *tmp = {att_pointList[i].getX(), att_pointList[i].getY(), 0.0, value};
+		pointSet->InsertNextPoint(tmp);
+		wtfIsThis->SetTuple(i, tmp + 3);
+	}
 
-  Grid->Allocate();
-  Grid->SetPoints(pointSet); 
-  for (unsigned int i = 0; i < cellData_.size(); ++i)
-  {
-    Grid->InsertNextCell(dimension_== 2 ? VTK_TRIANGLE : VTK_TETRA, dimension_+1, cellData_[i].data());
-  }
-  if (vertexData_[0].size() - 3 == 1)
-    (*(*Grid).GetPointData()).SetScalars(wtfIsThis);
-  if (vertexData_[0].size() - 3 == 3)
-    (*(*Grid).GetPointData()).SetVectors(wtfIsThis);
-  if (vertexData_[0].size() - 3 == 9)
-    (*(*Grid).GetPointData()).SetTensors(wtfIsThis);
+	Grid->Allocate();
+	Grid->SetPoints(pointSet); 
+	for (unsigned int i = 0; i < att_triangleList.size(); ++i)
+	{
+		long long int *tmp = {att_triangleList[i][0]->getId(), att_triangleList[i][1]->getId(), att_triangleList[i][2]->getId()};
+		Grid->InsertNextCell(dimension_== 2 ? VTK_TRIANGLE : VTK_TETRA, dimension_+1, tmp);
+	}
+	(*(*Grid).GetPointData()).SetScalars(wtfIsThis);
 
+	outputFile->SetFileName(outputFileName_.c_str());
+	outputFile->SetInputData(Grid);
+	outputFile->Write();
 
-  outputFile->SetFileName(outputFileName_.c_str());
-  outputFile->SetInputData(Grid);
-  outputFile->Write();
+	Grid->Delete();
+	pointSet->Delete();
+	wtfIsThis->Delete();
+	outputFile->Delete();
 
-  Grid->Delete();
-  pointSet->Delete();
-  wtfIsThis->Delete();
-  outputFile->Delete();
-  
-  cout << "[Importer] VTK triangulation written in "
-    << t.getElapsedTime() << " s." << endl;
-  
-  return ;
+	cout << "[Importer] VTK triangulation written in "
+	<< t.getElapsedTime() << " s." << endl;
+
+	return ;
 }
+
 void Mesh :: assemble() {
 	if (att_A)
 		delete att_A;
