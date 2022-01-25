@@ -94,9 +94,9 @@ void Mesh :: assemble() {
 }
 
 void Mesh :: solve() {
-	ConjugateGradient<SparseMatrix<double>, Lower | Upper> solver;
-	solver.compute(att_A);
-	att_X = solver.solve(att_F);
+	Eigen :: ConjugateGradient<Eigen :: SparseMatrix<double>, Eigen :: Lower | Eigen :: Upper> solver;
+	solver.compute(*att_A);
+	*att_X = solver.solve(*att_F);
 }
 
 Mesh :: Mesh(std :: string filename) : att_freedomDegrees(0), att_A(NULL), att_F(NULL), att_X(NULL) {
