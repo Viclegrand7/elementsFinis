@@ -23,6 +23,7 @@ public:
 	Mesh(std::string filename);
 	~Mesh(); //delete each Point *
 	void assemble();
+	void VTKExport();
 };
 
 #endif /* BV_TD_MESH_HH */

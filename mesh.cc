@@ -15,7 +15,10 @@ std :: vector<std :: string> split (const std :: string &s, char delim) {
 
     return result;
 }
-
+void Mesh :: VTKExport()
+{
+	return ;
+}
 void Mesh :: assemble() {
 	if (att_A)
 		delete att_A;
