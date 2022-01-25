@@ -22,13 +22,11 @@ public:
 	long long getId() {return att_id;}
 	long long getDdl() {return att_ddl;}
 	Point(double x, double y, unsigned char borderType = BORDER_NO_CONDITION) : 
-		att_x(x), att_y(y), att_borderType(borderType), att_id(++globalId), att_ddl(-1) {
-			if (att_borderType == BORDER_NO_CONDITION) {
-				att_ddl = ++globalDdl;
-			}
+		att_x(x), att_y(y), att_borderType(borderType), att_id(++globalId) {
+			att_ddl = att_borderType == BORDER_NO_CONDITION ? ++globalDdl : -1;
 		}
-	friend std :: ostream &operator<<(std :: ostream &out, Point &self) {
-		return out << self.att_x << '\t' << self.att_y;
+	std :: ostream &operator<<(std :: ostream &out) {
+		return out << att_x << '\t' << att_y;
 	}
 };
 
