@@ -1,1 +1,0 @@
-/usr/bin/c++     CMakeFiles/meshReader.dir/main.cc.o CMakeFiles/meshReader.dir/mesh.cc.o CMakeFiles/meshReader.dir/triangle.cc.o  -o meshReader 

@@ -16,9 +16,9 @@ std :: vector<std :: string> split (const std :: string &s, char delim) {
     return result;
 }
 
-void Mesh :: VTKExport(const string &fileName){
+void Mesh :: VTKExport(const std :: string &fileName){
 	unsigned int dimension_ = 2;
-	Timer t;
+//	Timer t;
 	vtkUnstructuredGrid *Grid                 = vtkUnstructuredGrid::New();
 	vtkPoints *pointSet                       = vtkPoints::New();
 	vtkDoubleArray *wtfIsThis                 = vtkDoubleArray::New();
@@ -30,24 +30,23 @@ void Mesh :: VTKExport(const string &fileName){
 	for (unsigned int i = 0; i < att_pointList.size(); ++i)
 	{
 		double value = 0.0;
-		long long ddl = att_pointList[i].getDdl();
+		long long ddl = att_pointList[i]->getDdl();
 		if (ddl != -1)
-			value = att_X(ddl);
-		double *tmp = {att_pointList[i].getX(), att_pointList[i].getY(), 0.0, value};
+			value = (*att_X)(ddl);
+		double tmp[] = {att_pointList[i]->getX(), att_pointList[i]->getY(), 0.0, value};
 		pointSet->InsertNextPoint(tmp);
 		wtfIsThis->SetTuple(i, tmp + 3);
 	}
 
 	Grid->Allocate();
 	Grid->SetPoints(pointSet); 
-	for (unsigned int i = 0; i < att_triangleList.size(); ++i)
-	{
-		long long int *tmp = {att_triangleList[i][0]->getId(), att_triangleList[i][1]->getId(), att_triangleList[i][2]->getId()};
+	for (unsigned int i = 0; i < att_triangleList.size(); ++i) {
+		long long int tmp[]  = {(*(att_triangleList[i]))[0]->getId(), (*(att_triangleList[i]))[1]->getId(), (*(att_triangleList[i]))[2]->getId()};
 		Grid->InsertNextCell(dimension_== 2 ? VTK_TRIANGLE : VTK_TETRA, dimension_+1, tmp);
 	}
 	(*(*Grid).GetPointData()).SetScalars(wtfIsThis);
 
-	outputFile->SetFileName(outputFileName_.c_str());
+	outputFile->SetFileName(fileName.c_str());
 	outputFile->SetInputData(Grid);
 	outputFile->Write();
 
@@ -56,8 +55,8 @@ void Mesh :: VTKExport(const string &fileName){
 	wtfIsThis->Delete();
 	outputFile->Delete();
 
-	cout << "[Importer] VTK triangulation written in "
-	<< t.getElapsedTime() << " s." << endl;
+//	cout << "[Importer] VTK triangulation written in "
+//	<< t.getElapsedTime() << " s." << endl;
 
 	return ;
 }

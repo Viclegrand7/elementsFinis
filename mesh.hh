@@ -30,7 +30,7 @@ public:
 	Mesh(std::string filename);
 	~Mesh(); //delete each Point *
 	void assemble();
-	void VTKExport(const string &fileName);
+	void VTKExport(const std :: string &fileName);
 	void solve();
 };
 
