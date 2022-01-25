@@ -1,6 +1,9 @@
 #ifndef BV_TD_TRIANGLE_HH
 #define BV_TD_TRIANGLE_HH
 
+#include <vector>
+#include <cassert>
+
 #include "point.hh"
 
 class Triangle {
@@ -10,7 +13,7 @@ public:
 	Point *operator[] (unsigned int index) {return index < 3 ? att_points[index] : nullptr;}
 	Triangle(Point *first, Point *second, Point *third);
 	double getSurface() {return att_surface;}
-	double gradPhi(int i);
+	std :: vector<double> gradPhi(int i);
 	double phi(double x, double y, int i);
 	friend std :: ostream &operator<<(std :: ostream &out, Triangle &self) {
 		return out << self.att_points[0]->getId() << '\t' << self.att_points[1]->getId() << '\t' << self.att_points[2]->getId();

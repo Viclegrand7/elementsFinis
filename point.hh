@@ -23,7 +23,7 @@ public:
 	long long getDdl() {return att_ddl;}
 	Point(double x, double y, unsigned char borderType = BORDER_NO_CONDITION) : 
 		att_x(x), att_y(y), att_borderType(borderType), att_id(++globalId) {
-			att_ddl = att_borderType == BORDER_NO_CONDITION ? ++globalDdl : -1;
+			att_ddl = att_borderType == BORDER_NO_CONDITION ? globalDdl++ : -1;
 		}
 	std :: ostream &operator<<(std :: ostream &out) {
 		return out << att_x << '\t' << att_y;

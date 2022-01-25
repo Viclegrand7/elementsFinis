@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <numeric>
 #include <eigen3/Eigen/Sparse>
 #include <eigen3/Eigen/Dense>
 

@@ -87,18 +87,24 @@ void Mesh :: assemble() {
 				unsigned char J = (**triangle)[j]->borderType();
 				if (J != BORDER_NO_CONDITION)
 					continue;
-				contributions.push_back(Eigen :: Triplet<double>((**triangle)[i]->getDdl(), (**triangle)[j]->getId(), (*triangle)->gradPhi(i) * (*triangle)->gradPhi(j)));
+				std :: vector<double> first((*triangle)->gradPhi(i));
+				std :: vector<double> second((*triangle)->gradPhi(j));
+				contributions.push_back(Eigen :: Triplet<double>((**triangle)[i]->getDdl(), (**triangle)[j]->getDdl(), std :: inner_product(first.begin(), first.end(), second.begin(), 0)));
+				std :: cout << (**triangle)[i]->getDdl() << '\t' << (**triangle)[j]->getDdl() << "\t\t" << std :: inner_product(first.begin(), first.end(), second.begin(), 0) << std :: endl;
 			}
 		}
 	}
+	std :: cout << contributions.size()  << std :: endl;
 	att_A->setFromTriplets(contributions.begin(), contributions.end());
 	std :: cout << "finito pipo" << std :: endl;
 }
 
 void Mesh :: solve() {
+	std :: cout << "Bonjour" << std :: endl;
 	Eigen :: ConjugateGradient<Eigen :: SparseMatrix<double>, Eigen :: Lower | Eigen :: Upper> solver;
 	solver.compute(*att_A);
 	*att_X = solver.solve(*att_F);
+	std :: cout << "Au revoir" << std :: endl;
 }
 
 Mesh :: Mesh(std :: string filename) : att_freedomDegrees(0), att_A(NULL), att_F(NULL), att_X(NULL) {
@@ -132,20 +138,20 @@ Mesh :: Mesh(std :: string filename) : att_freedomDegrees(0), att_A(NULL), att_F
 		getline(input_stream, line);
 		if (line == "$EndNodes")
 			break;
+
 		val = split(line, ' ');
 
-		const char* label = val[0].c_str();		// char label = val[0] ; //Plus simple non ?
+		char label = val[0].front();
 		//si c'est 0 ou 1 on est au bord, sinon on est au centre
 		for(int i = 0; i<stoi(val[3]); ++i)
 			getline(input_stream, line);//On fait sauter les nodes ID
 		int iterations = stoi(val[3]);
 		for(int i = 0; i<iterations; ++i)
 		{
-			bool isBorder = (*label!='2');
+			bool isBorder = (label!='2');
 			getline(input_stream, line);
 			val = split(line, ' ');
-//			att_pointList.push_back(new Point(stod(val[0]), stod(val[1]), isBorder));
-							att_pointList.push_back(new Point(stod(val[0]), stod(val[1]), '2' - *label));
+			att_pointList.push_back(new Point(stod(val[0]), stod(val[1]), '2' - label));
 							att_freedomDegrees += !isBorder; //ZNGIZEIGBZEIGIUEZGIZEGG IL FAUDRA LE CHANGER
 		}
 	}
