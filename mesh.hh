@@ -24,6 +24,7 @@ public:
 	~Mesh(); //delete each Point *
 	void assemble();
 	void VTKExport();
+	void solve();
 };
 
 #endif /* BV_TD_MESH_HH */

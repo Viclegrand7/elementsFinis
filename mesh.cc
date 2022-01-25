@@ -31,16 +31,16 @@ void Mesh :: assemble() {
 	std :: cout << Point :: globalDdl << std :: endl;
 
 	std :: vector<Eigen :: Triplet<double>> contributions;
-	for (auto triangle = att_triangleList.begin() ; triangle != att_triangleList.end() ; ++triangle) {
-		for (unsigned int i = 0 ; i < 2 ; ++i) {
+	for (std :: vector <Triangle *> :: iterator triangle = att_triangleList.begin() ; triangle != att_triangleList.end() ; ++triangle) {
+		for (unsigned int i = 0 ; i < 3 ; ++i) {
 			unsigned char I = (**triangle)[i]->borderType();
 			if (I != BORDER_NO_CONDITION)
 				continue;
-			for (unsigned int j = 0 ; j < 2 ; ++j) {
+			for (unsigned int j = 0 ; j < 3 ; ++j) {
 				{
 					double x = (*triangle)->middleOpposedX(j);
 					double y = (*triangle)->middleOpposedY(j);
-					(*att_F)((**triangle)[i]->getDdl()) += f(x, y) * (*triangle)->phi(x, y, i) * (*triangle)->surface() / 3;
+					(*att_F)((**triangle)[i]->getDdl()) += f(x, y) * (*triangle)->phi(x, y, i) * (*triangle)->getSurface() / 3;
 				}
 				unsigned char J = (**triangle)[j]->borderType();
 				if (J != BORDER_NO_CONDITION)
@@ -51,6 +51,12 @@ void Mesh :: assemble() {
 	}
 	att_A->setFromTriplets(contributions.begin(), contributions.end());
 	std :: cout << "finito pipo" << std :: endl;
+}
+
+void Mesh :: solve() {
+	ConjugateGradient<SparseMatrix<double>, Lower | Upper> solver;
+	solver.compute(att_A);
+	att_X = solver.solve(att_F);
 }
 
 Mesh :: Mesh(std :: string filename) : att_freedomDegrees(0), att_A(NULL), att_F(NULL), att_X(NULL) {
