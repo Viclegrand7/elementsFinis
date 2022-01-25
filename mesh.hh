@@ -9,6 +9,13 @@
 #include <eigen3/Eigen/Sparse>
 #include <eigen3/Eigen/Dense>
 
+#include <vtkType.h>
+#include <vtkUnstructuredGrid.h>
+#include <vtkPoints.h>
+#include <vtkDoubleArray.h>
+#include <vtkPointData.h>
+#include <vtkXMLUnstructuredGridWriter.h>
+
 #include "point.hh"
 #include "triangle.hh"
 
@@ -23,7 +30,7 @@ public:
 	Mesh(std::string filename);
 	~Mesh(); //delete each Point *
 	void assemble();
-	void VTKExport();
+	void VTKExport(const string &fileName);
 	void solve();
 };
 
