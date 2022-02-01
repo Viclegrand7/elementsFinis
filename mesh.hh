@@ -33,6 +33,8 @@ public:
 	void assemble();
 	void VTKExport(const std :: string &fileName);
 	void solve();
+
+//	void test();
 };
 
 #endif /* BV_TD_MESH_HH */

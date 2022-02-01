@@ -69,9 +69,6 @@ void Mesh :: assemble() {
 	att_A = new Eigen :: SparseMatrix <double> (att_freedomDegrees, att_freedomDegrees);
 	att_F = new Eigen :: VectorXd(att_freedomDegrees);
 
-	std :: cout << "freedom degrees: " << att_freedomDegrees << std :: endl;
-	std :: cout << Point :: globalDdl << std :: endl;
-
 	std :: vector<Eigen :: Triplet<double>> contributions;
 	for (std :: vector <Triangle *> :: iterator triangle = att_triangleList.begin() ; triangle != att_triangleList.end() ; ++triangle) {
 		for (unsigned int i = 0 ; i < 3 ; ++i) {
@@ -90,21 +87,24 @@ void Mesh :: assemble() {
 				std :: vector<double> first((*triangle)->gradPhi(i));
 				std :: vector<double> second((*triangle)->gradPhi(j));
 				contributions.push_back(Eigen :: Triplet<double>((**triangle)[i]->getDdl(), (**triangle)[j]->getDdl(), std :: inner_product(first.begin(), first.end(), second.begin(), 0)));
-				std :: cout << (**triangle)[i]->getDdl() << '\t' << (**triangle)[j]->getDdl() << "\t\t" << std :: inner_product(first.begin(), first.end(), second.begin(), 0) << std :: endl;
+//				std :: cout << (**triangle)[i]->getDdl() << '\t' << (**triangle)[j]->getDdl() << "\t\t" << std :: inner_product(first.begin(), first.end(), second.begin(), 0) << std :: endl;
 			}
 		}
 	}
-	std :: cout << contributions.size()  << std :: endl;
 	att_A->setFromTriplets(contributions.begin(), contributions.end());
-	std :: cout << "finito pipo" << std :: endl;
+					std :: cout << *att_A << std :: endl;
+					std :: cout << *att_F << std :: endl;
+	std :: cout << "Done assembling" << std :: endl;
 }
 
 void Mesh :: solve() {
-	std :: cout << "Bonjour" << std :: endl;
+	if (att_X)
+		delete att_X;
+	att_X = new Eigen :: VectorXd(att_freedomDegrees);
 	Eigen :: ConjugateGradient<Eigen :: SparseMatrix<double>, Eigen :: Lower | Eigen :: Upper> solver;
 	solver.compute(*att_A);
 	*att_X = solver.solve(*att_F);
-	std :: cout << "Au revoir" << std :: endl;
+	std :: cout << "Solved" << std :: endl;
 }
 
 Mesh :: Mesh(std :: string filename) : att_freedomDegrees(0), att_A(NULL), att_F(NULL), att_X(NULL) {
@@ -171,6 +171,21 @@ Mesh :: Mesh(std :: string filename) : att_freedomDegrees(0), att_A(NULL), att_F
 		att_triangleList.push_back(new Triangle(att_pointList[stoi(val[1])-1], att_pointList[stoi(val[2])-1], att_pointList[stoi(val[3])-1]));
 	}
 }
+
+/*
+void Mesh :: test() {
+	std :: vector<Eigen :: Triplet<double>> contributions;
+
+	unsigned int bidule(0);
+	for (std :: vector <Triangle *> :: iterator triangle = att_triangleList.begin() ; triangle != att_triangleList.end() ; ++triangle, ++bidule) {
+		for (unsigned int i = 0 ; i < 3 ; ++i) {
+			for (unsigned int j = 0 ; j < 3 ; ++j) {
+				assert((*triangle)->phi(((**triangle)[i])->getX(), ((**triangle)[i])->getY(), j) == (i == j));
+			}
+		}
+	}
+}
+*/
 
 Mesh :: ~Mesh() {
 	if (att_A)
