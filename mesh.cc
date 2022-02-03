@@ -132,44 +132,48 @@ Mesh :: Mesh(std :: string filename) : att_freedomDegrees(0), att_A(NULL), att_F
 	getline(input_stream, line);
 	val = split(line, ' ');
 //	int jmax = stoi(val[1]);
-
-	while(true)
+	//On load les points
+	int iter = stoi(val[0]);
+	for (int i = 0; i < iter; ++i)
 	{
 		getline(input_stream, line);
-		if (line == "$EndNodes")
-			break;
-
 		val = split(line, ' ');
-
-		char label = val[0].front();
-		//si c'est 0 ou 1 on est au bord, sinon on est au centre
-		for(int i = 0; i<stoi(val[3]); ++i)
-			getline(input_stream, line);//On fait sauter les nodes ID
-		int iterations = stoi(val[3]);
-		for(int i = 0; i<iterations; ++i)
-		{
-			bool isBorder = (label!='2');
-			getline(input_stream, line);
-			val = split(line, ' ');
-			att_pointList.push_back(new Point(stod(val[0]), stod(val[1]), '2' - label));
-							att_freedomDegrees += !isBorder; //ZNGIZEIGBZEIGIUEZGIZEGG IL FAUDRA LE CHANGER
-		}
+		att_pointList.push_back(new Point(stod(val[1]), stod(val[2]), 0));
 	}
-
+	//On skip $EndNodes
 	getline(input_stream, line);
+  //On skip $Elements
+	getline(input_stream, line);
+	//On load le nombre d'elements
 	getline(input_stream, line);
 	val = split(line, ' ');
-	getline(input_stream, line);
-	int i_init = stoi(val[2]);
-	int i_max  = stoi(val[3]);
-
-
-	for (int i = i_init; i <= i_max; ++i)
+	iter = stoi(val[0]);
+	for (int i = 0; i < iter; ++i)
 	{
 		getline(input_stream, line);
 		val = split(line, ' ');
-		att_triangleList.push_back(new Triangle(att_pointList[stoi(val[1])-1], att_pointList[stoi(val[2])-1], att_pointList[stoi(val[3])-1]));
+		if (val[1] == "1")
+		{
+			//On est sur un bord, on va update les labels des points en fonction des conditions de bord
+			//Le label est dans val[3], on peut définir ce qu'on veut
+			if (val[3] == "98"){//On set le label des points val[5] et val[6] à Dirichlet
+				att_pointList[stoi(val[5])-1]->setBorderType(2);
+				att_pointList[stoi(val[6])-1]->setBorderType(2);
+			}
+			if (val[3] == "99"){//On set le label des points val[5] et val[6] à Neumann
+				att_pointList[stoi(val[5])-1]->setBorderType(1);
+				att_pointList[stoi(val[6])-1]->setBorderType(1);
+			;}
+		}
+		if (val[1] == "2")
+		{
+			att_triangleList.push_back(new Triangle(att_pointList[stoi(val[5])-1], att_pointList[stoi(val[6])-1], att_pointList[stoi(val[7])-1]));
+			//On définit un triangle
+		}
+
 	}
+
+
 }
 
 /*

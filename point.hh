@@ -18,6 +18,7 @@ public:
 	static long long globalDdl;
 	double getX() {return att_x;}
 	double getY() {return att_y;}
+	void setBorderType(unsigned char label) {att_borderType = label;}
 	unsigned char borderType() {return att_borderType;}
 	long long getId() {return att_id;}
 	long long getDdl() {return att_ddl;}
