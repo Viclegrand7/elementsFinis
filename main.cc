@@ -18,4 +18,5 @@ int main() {
 	mesh.test();
 	mesh.assemble();
 	mesh.solve();
+	mesh.VTKExport("test.vtu");
 }

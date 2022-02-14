@@ -15,7 +15,29 @@ std :: vector<std :: string> split (const std :: string &s, char delim) {
 
     return result;
 }
+void Mesh :: TRIExport(const std :: string &fileName){
+	//#dim = 2, #nbr de comp = 4, #nbr de point #nbr de traingles
+	//X Y Z value
+	// Point 1, 2 , 3
+	std::ofstream myfile;
+  myfile.open (fileName); 
+  myfile << "2 4 "<<att_pointList.size() << " " << att_triangleList.size() << std::endl;
+  for (unsigned int i = 0; i < att_pointList.size(); ++i)
+  {
+  	double value = 0.0;
+		long long ddl = att_pointList[i]->getDdl();
+		if (ddl == BORDER_NO_CONDITION || ddl == BORDER_NEUMANN)
+			value = (*att_X)(ddl);
+  	myfile << att_pointList[i]->getX() << " " << att_pointList[i]->getY() << " 0 " << value << std::endl;
+  }
+  for (unsigned int i = 0; i < att_triangleList.size(); ++i)
+  {
+  	myfile << (*(att_triangleList[i]))[0]->getId() << " " << (*(att_triangleList[i]))[1]->getId() << " "<< (*(att_triangleList[i]))[2]->getId()<<std::endl;
+  }
 
+  myfile.close();
+
+}
 void Mesh :: VTKExport(const std :: string &fileName){
 	unsigned int dimension_ = 2;
 //	Timer t;
