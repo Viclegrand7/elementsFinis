@@ -38,6 +38,20 @@ void Mesh :: TRIExport(const std :: string &fileName){
   myfile.close();
 
 }
+
+void Mesh :: GNUPlotExport(const std :: string &fileName){
+	std::ofstream myfile;
+  myfile.open (fileName); 
+  for (unsigned int i = 0; i < att_pointList.size(); ++i)
+  {
+  	double value = 0.0;
+		long long ddl = att_pointList[i]->getDdl();
+		if (ddl == BORDER_NO_CONDITION || ddl == BORDER_NEUMANN)
+			value = (*att_X)(ddl);
+  	myfile << att_pointList[i]->getX() << " " << att_pointList[i]->getY() << " 0 " << value << std::endl;
+  }
+}
+
 void Mesh :: VTKExport(const std :: string &fileName){
 	unsigned int dimension_ = 2;
 //	Timer t;
