@@ -23,6 +23,7 @@
 class Mesh {
 	std :: vector <Point *> att_pointList;
 	std :: vector <Triangle *> att_triangleList;
+	std :: vector <bool> att_isNeumann;
 	size_t att_freedomDegrees;
 	Eigen :: SparseMatrix <double> *att_A;
 	Eigen :: VectorXd *att_F;
@@ -33,8 +34,9 @@ public:
 	void assemble();
 	void VTKExport(const std :: string &fileName);
 	void solve();
+	void decreaseDdlFromPoint(unsigned int figure);
 
-//	void test();
+	void test();
 };
 
 #endif /* BV_TD_MESH_HH */

@@ -15,7 +15,7 @@ long long Point :: globalDdl = 0;
 
 int main() {
 	Mesh mesh("simple_mesh.msh");
-//	mesh.test();
+	mesh.test();
 	mesh.assemble();
 	mesh.solve();
 }

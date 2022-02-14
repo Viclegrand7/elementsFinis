@@ -3,7 +3,8 @@
 
 #define BORDER_NO_CONDITION 0
 #define BORDER_NEUMANN 1
-#define BORDER_DIRICHLET 2
+#define BORDER_DIRICHLET_HOT 2
+#define BORDER_DIRICHLET_COLD 4
 
 #include <iostream>
 
@@ -29,6 +30,7 @@ public:
 	std :: ostream &operator<<(std :: ostream &out) {
 		return out << att_x << '\t' << att_y;
 	}
+	void decreaseDdl() {--att_ddl;}
 };
 
 #endif /* BV_TD_POINT_HH */

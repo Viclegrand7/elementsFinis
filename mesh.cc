@@ -1,7 +1,7 @@
 #include "mesh.hh"
 
 double f(double x, double y) {
-	return x + y;
+	return 2 * M_PI * M_PI * sin(M_PI * x) * sin(M_PI * y);
 }
 
 std :: vector<std :: string> split (const std :: string &s, char delim) {
@@ -62,6 +62,7 @@ void Mesh :: VTKExport(const std :: string &fileName){
 }
 
 void Mesh :: assemble() {
+	std :: cout << "freedomDegrees detected: " << att_freedomDegrees << std :: endl;
 	if (att_A)
 		delete att_A;
 	if (att_F)
@@ -86,14 +87,18 @@ void Mesh :: assemble() {
 					continue;
 				std :: vector<double> first((*triangle)->gradPhi(i));
 				std :: vector<double> second((*triangle)->gradPhi(j));
-				contributions.push_back(Eigen :: Triplet<double>((**triangle)[i]->getDdl(), (**triangle)[j]->getDdl(), std :: inner_product(first.begin(), first.end(), second.begin(), 0)));
+				contributions.push_back(Eigen :: Triplet<double>((**triangle)[i]->getDdl(), (**triangle)[j]->getDdl(), (*triangle)->getSurface() * std :: inner_product(first.begin(), first.end(), second.begin(), 0)));
 //				std :: cout << (**triangle)[i]->getDdl() << '\t' << (**triangle)[j]->getDdl() << "\t\t" << std :: inner_product(first.begin(), first.end(), second.begin(), 0) << std :: endl;
 			}
 		}
 	}
+
+	for (unsigned int i = 0 ; i < contributions.size() ; ++i)
+		std :: cout << contributions[i].col() << "\t" << contributions[i].row() << "\t" << contributions[i].value() << std :: endl;
+
 	att_A->setFromTriplets(contributions.begin(), contributions.end());
-					std :: cout << *att_A << std :: endl;
-					std :: cout << *att_F << std :: endl;
+					std :: cout << "A = " << *att_A << std :: endl;
+					std :: cout << "F = " << *att_F << std :: endl;
 	std :: cout << "Done assembling" << std :: endl;
 }
 
@@ -104,7 +109,7 @@ void Mesh :: solve() {
 	Eigen :: ConjugateGradient<Eigen :: SparseMatrix<double>, Eigen :: Lower | Eigen :: Upper> solver;
 	solver.compute(*att_A);
 	*att_X = solver.solve(*att_F);
-	std :: cout << "Solved" << std :: endl;
+	std :: cout << "Solved. X = " << *att_X << std :: endl;
 }
 
 Mesh :: Mesh(std :: string filename) : att_freedomDegrees(0), att_A(NULL), att_F(NULL), att_X(NULL) {
@@ -139,6 +144,8 @@ Mesh :: Mesh(std :: string filename) : att_freedomDegrees(0), att_A(NULL), att_F
 		getline(input_stream, line);
 		val = split(line, ' ');
 		att_pointList.push_back(new Point(stod(val[1]), stod(val[2]), 0));
+		att_isNeumann.push_back(false);
+		++att_freedomDegrees;
 	}
 	//On skip $EndNodes
 	getline(input_stream, line);
@@ -159,13 +166,15 @@ Mesh :: Mesh(std :: string filename) : att_freedomDegrees(0), att_A(NULL), att_F
 			if (val[3] == "98"){//On set le label des points val[5] et val[6] à Dirichlet
 				att_pointList[stoi(val[5])-1]->setBorderType(2);
 				att_pointList[stoi(val[6])-1]->setBorderType(2);
+				decreaseDdlFromPoint(stoi(val[5]) - 1);
+				decreaseDdlFromPoint(stoi(val[6]) - 1);
 			}
-			if (val[3] == "99"){//On set le label des points val[5] et val[6] à Neumann
+			else if (val[3] == "99"){//On set le label des points val[5] et val[6] à Neumann
 				att_pointList[stoi(val[5])-1]->setBorderType(1);
 				att_pointList[stoi(val[6])-1]->setBorderType(1);
-			;}
+			}
 		}
-		if (val[1] == "2")
+		else if (val[1] == "2")
 		{
 			att_triangleList.push_back(new Triangle(att_pointList[stoi(val[5])-1], att_pointList[stoi(val[6])-1], att_pointList[stoi(val[7])-1]));
 			//On définit un triangle
@@ -176,7 +185,6 @@ Mesh :: Mesh(std :: string filename) : att_freedomDegrees(0), att_A(NULL), att_F
 
 }
 
-/*
 void Mesh :: test() {
 	std :: vector<Eigen :: Triplet<double>> contributions;
 
@@ -189,7 +197,16 @@ void Mesh :: test() {
 		}
 	}
 }
-*/
+
+void Mesh :: decreaseDdlFromPoint(unsigned int figure) {
+	if (att_isNeumann[figure])
+		return;
+	att_isNeumann[figure] = 1;
+	--att_freedomDegrees;
+	--Point :: globalDdl;
+	for (unsigned int i = figure ; i < att_pointList.size() ; ++i)
+		att_pointList[i]->decreaseDdl();
+}
 
 Mesh :: ~Mesh() {
 	if (att_A)
