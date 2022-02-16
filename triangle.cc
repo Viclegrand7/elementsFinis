@@ -23,8 +23,6 @@ std :: vector<double> Triangle :: gradPhi(int i) {
 		}
 		case 2:
 		{
-			std :: cout << att_points[0]->getY() << "\t" << att_points[1]->getY() << "\t" << (2 * att_surface) << std :: endl;
-			std :: cout << att_points[1]->getX() << "\t" << att_points[0]->getX() << "\t" << (2 * att_surface) << std :: endl;
 			tmp.push_back((att_points[0]->getY() - att_points[1]->getY()) / (2 * att_surface));
 			tmp.push_back((att_points[1]->getX() - att_points[0]->getX()) / (2 * att_surface));
 			return tmp;

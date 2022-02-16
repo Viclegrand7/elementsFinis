@@ -1,5 +1,9 @@
 #include "mesh.hh"
 
+#define dirichlet_hot_condition 20
+#define dirichlet_cold_condition 5
+
+
 double f(double x, double y) {
 	return 2 * M_PI * M_PI * sin(M_PI * x) * sin(M_PI * y);
 }
@@ -48,7 +52,7 @@ void Mesh :: GNUPlotExport(const std :: string &fileName){
 		long long ddl = att_pointList[i]->getDdl();
 		if (ddl == BORDER_NO_CONDITION || ddl == BORDER_NEUMANN)
 			value = (*att_X)(ddl);
-  	myfile << att_pointList[i]->getX() << " " << att_pointList[i]->getY() << " 0 " << value << std::endl;
+  	myfile << att_pointList[i]->getX() << " " << att_pointList[i]->getY() << " " << value << std::endl;
   }
 }
 
@@ -110,7 +114,7 @@ void Mesh :: assemble() {
 	for (std :: vector <Triangle *> :: iterator triangle = att_triangleList.begin() ; triangle != att_triangleList.end() ; ++triangle) {
 		for (unsigned int i = 0 ; i < 3 ; ++i) {
 			unsigned char I = (**triangle)[i]->borderType();
-			if (I != BORDER_NO_CONDITION)
+			if (I & (BORDER_DIRICHLET_COLD | BORDER_DIRICHLET_HOT))
 				continue;
 			for (unsigned int j = 0 ; j < 3 ; ++j) {
 				{
@@ -119,8 +123,15 @@ void Mesh :: assemble() {
 					(*att_F)((**triangle)[i]->getDdl()) += f(x, y) * (*triangle)->phi(x, y, i) * (*triangle)->getSurface() / 3;
 				}
 				unsigned char J = (**triangle)[j]->borderType();
-				if (J != BORDER_NO_CONDITION)
+				if (J & (BORDER_DIRICHLET_COLD | BORDER_DIRICHLET_HOT)) {
+					std :: vector<double> first((*triangle)->gradPhi(i));
+					std :: vector<double> second((*triangle)->gradPhi(j));
+					if (J == BORDER_DIRICHLET_COLD)
+						(*att_F)((**triangle)[i]->getDdl()) -= dirichlet_cold_condition * (*triangle)->getSurface() * std :: inner_product(first.begin(), first.end(), second.begin(), 0);
+					else
+						(*att_F)((**triangle)[i]->getDdl()) -= dirichlet_hot_condition * (*triangle)->getSurface() * std :: inner_product(first.begin(), first.end(), second.begin(), 0);
 					continue;
+				}
 				std :: vector<double> first((*triangle)->gradPhi(i));
 				std :: vector<double> second((*triangle)->gradPhi(j));
 				contributions.push_back(Eigen :: Triplet<double>((**triangle)[i]->getDdl(), (**triangle)[j]->getDdl(), (*triangle)->getSurface() * std :: inner_product(first.begin(), first.end(), second.begin(), 0)));
@@ -128,13 +139,12 @@ void Mesh :: assemble() {
 			}
 		}
 	}
-
-	for (unsigned int i = 0 ; i < contributions.size() ; ++i)
-		std :: cout << contributions[i].col() << "\t" << contributions[i].row() << "\t" << contributions[i].value() << std :: endl;
+//				for (unsigned int i = 0 ; i < contributions.size() ; ++i)
+//					std :: cout << contributions[i].col() << "\t" << contributions[i].row() << "\t" << contributions[i].value() << std :: endl;
 
 	att_A->setFromTriplets(contributions.begin(), contributions.end());
-					std :: cout << "A = " << *att_A << std :: endl;
-					std :: cout << "F = " << *att_F << std :: endl;
+//					std :: cout << "A = " << *att_A << std :: endl;
+//					std :: cout << "F = " << *att_F << std :: endl;
 	std :: cout << "Done assembling" << std :: endl;
 }
 
@@ -145,8 +155,11 @@ void Mesh :: solve() {
 	Eigen :: ConjugateGradient<Eigen :: SparseMatrix<double>, Eigen :: Lower | Eigen :: Upper> solver;
 	solver.compute(*att_A);
 	*att_X = solver.solve(*att_F);
-	std :: cout << "Solved. X = " << *att_X << std :: endl;
+	std :: cout << "Solved";
+//	std :: cout << ". X = " << *att_X;
+	std :: cout << std :: endl;
 }
+long long compteur(0);
 
 Mesh :: Mesh(std :: string filename) : att_freedomDegrees(0), att_A(NULL), att_F(NULL), att_X(NULL) {
 	std::vector<std::string> val;
@@ -218,7 +231,6 @@ Mesh :: Mesh(std :: string filename) : att_freedomDegrees(0), att_A(NULL), att_F
 
 	}
 
-
 }
 
 void Mesh :: test() {
@@ -234,14 +246,54 @@ void Mesh :: test() {
 	}
 }
 
+
 void Mesh :: decreaseDdlFromPoint(unsigned int figure) {
 	if (att_isNeumann[figure])
 		return;
 	att_isNeumann[figure] = 1;
 	--att_freedomDegrees;
 	--Point :: globalDdl;
-	for (unsigned int i = figure ; i < att_pointList.size() ; ++i)
-		att_pointList[i]->decreaseDdl();
+	att_pointList[figure]->deleteDdl();
+	for (++figure; figure < att_pointList.size() ; ++figure) {
+			if (figure == 46677)
+				++compteur;
+		att_pointList[figure]->decreaseDdl();
+	}
+}
+
+double realSolutionSquare(double x, double y) {
+	return sin(M_PI * x) * sin(M_PI * y);
+}
+
+double Mesh :: computeError() {
+	double squaredError(0.);
+	std :: vector<double> deltaU{0., 0., 0.};
+	for (std :: vector <Triangle *> :: iterator triangle = att_triangleList.begin() ; triangle != att_triangleList.end() ; ++triangle) {
+		for (unsigned int i = 0 ; i < 3 ; ++i) {
+			unsigned char I = (**triangle)[i]->borderType();
+			if (I & (BORDER_DIRICHLET_COLD | BORDER_DIRICHLET_HOT))
+				continue;
+			deltaU[i] = realSolutionSquare((**triangle)[i]->getX(), (**triangle)[i]->getY()) - (*att_X)((**triangle)[i]->getDdl());
+		}
+
+///*
+		std :: vector <double> tmpArray{0.,0.};
+		std :: vector <double> purelyTmpArray(2);
+		double tmp;
+		for (unsigned int i = 0 ; i < 3 ; ++i) {
+			purelyTmpArray = (*triangle)->gradPhi(i);
+			tmpArray[0] += purelyTmpArray[0] * deltaU[i];
+			tmpArray[1] += purelyTmpArray[1] * deltaU[i];
+		}
+		tmp = std :: inner_product(tmpArray.begin(), tmpArray.end(), tmpArray.begin(), 0);
+		squaredError = (*triangle)->getSurface() * tmp;
+//*/
+/*
+		for (unsigned int i = 0 ; i < 3 ; ++i)
+			squaredError += (*triangle)->getSurface() * std :: inner_product((*triangle)->gradPhi(i).begin(), (*triangle)->gradPhi(i).end(), (*triangle)->gradPhi(i).begin(), 0) * deltaU[i];
+*/
+	}
+	return sqrt(squaredError);
 }
 
 Mesh :: ~Mesh() {

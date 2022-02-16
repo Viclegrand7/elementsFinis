@@ -37,6 +37,7 @@ public:
 	void GNUPlotExport(const std :: string &fileName);
 	void solve();
 	void decreaseDdlFromPoint(unsigned int figure);
+	double computeError();
 
 	void test();
 };
