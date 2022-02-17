@@ -35,6 +35,7 @@ public:
 	void VTKExport(const std :: string &fileName);
 	void TRIExport(const std :: string &fileName);
 	void GNUPlotExport(const std :: string &fileName);
+	void ParaviewExport(const std :: string &fileName);
 	void solve();
 	void decreaseDdlFromPoint(unsigned int figure);
 	double computeError();
