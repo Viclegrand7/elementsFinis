@@ -3,9 +3,14 @@
 #define dirichlet_hot_condition 20
 #define dirichlet_cold_condition 5
 
-
+/*
 double f(double x, double y) {
 	return 2 * M_PI * M_PI * sin(M_PI * x) * sin(M_PI * y);
+}
+*/
+
+double f(double x, double y) {
+	return 2 * M_PI * M_PI * sin(M_PI * x) * cos(M_PI * y);
 }
 
 std :: vector<std :: string> split (const std :: string &s, char delim) {
@@ -159,7 +164,6 @@ void Mesh :: solve() {
 //	std :: cout << ". X = " << *att_X;
 	std :: cout << std :: endl;
 }
-long long compteur(0);
 
 Mesh :: Mesh(std :: string filename) : att_freedomDegrees(0), att_A(NULL), att_F(NULL), att_X(NULL) {
 	std::vector<std::string> val;
@@ -254,15 +258,16 @@ void Mesh :: decreaseDdlFromPoint(unsigned int figure) {
 	--att_freedomDegrees;
 	--Point :: globalDdl;
 	att_pointList[figure]->deleteDdl();
-	for (++figure; figure < att_pointList.size() ; ++figure) {
-			if (figure == 46677)
-				++compteur;
+	for (++figure; figure < att_pointList.size() ; ++figure)
 		att_pointList[figure]->decreaseDdl();
-	}
 }
-
+/*
 double realSolutionSquare(double x, double y) {
 	return sin(M_PI * x) * sin(M_PI * y);
+}
+*/
+double realSolutionSquare(double x, double y) {
+	return sin(M_PI * x) * cos(M_PI * y);
 }
 
 double Mesh :: computeError() {
