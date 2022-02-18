@@ -32,8 +32,6 @@ public:
 	Mesh(std::string filename);
 	~Mesh(); //delete each Point *
 	void assemble();
-	void VTKExport(const std :: string &fileName);
-	void TRIExport(const std :: string &fileName);
 	void GNUPlotExport(const std :: string &fileName);
 	void ParaviewExport(const std :: string &fileName);
 	void solve();

@@ -19,7 +19,12 @@ public:
 	static long long globalDdl;
 	double getX() {return att_x;}
 	double getY() {return att_y;}
-	void setBorderType(unsigned char label) {att_borderType = label;}
+	bool setBorderType(unsigned char label) {
+		if (att_borderType != BORDER_NO_CONDITION)
+			return false;
+		att_borderType = label;
+		return true;
+	}
 	unsigned char borderType() {return att_borderType;}
 	long long getId() {return att_id;}
 	long long getDdl() {return att_ddl;}
@@ -30,7 +35,7 @@ public:
 	std :: ostream &operator<<(std :: ostream &out) {
 		return out << att_x << '\t' << att_y;
 	}
-	void decreaseDdl() {if (att_ddl + 1) --att_ddl;}
+	void decreaseDdl() {if (att_ddl != -1) --att_ddl;}
 	void deleteDdl() {att_ddl = -1;}
 	static void resetGlobals() {
 		globalId = -1;
