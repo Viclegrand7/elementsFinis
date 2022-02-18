@@ -15,11 +15,11 @@ long long Point :: globalDdl;
 
 int main() {
 	Point :: resetGlobals();
-	Mesh mesh("flat.msh");
+	Mesh mesh("final_2.msh");
 	mesh.test();
 	mesh.assemble();
 	mesh.solve();
-	mesh.GNUPlotExport("final.dat");
+	mesh.GNUPlotExport("test.dat");
 	mesh.ParaviewExport("final.txt");
 
 }
