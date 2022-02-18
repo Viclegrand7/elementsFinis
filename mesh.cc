@@ -1,6 +1,6 @@
 #include "mesh.hh"
 
-#define dirichlet_hot_condition 0
+#define dirichlet_hot_condition 24
 #define dirichlet_cold_condition 5
 
 /*
@@ -176,6 +176,12 @@ Mesh :: Mesh(std :: string filename) : att_freedomDegrees(0), att_A(NULL), att_F
 		{
 			//On est sur un bord, on va update les labels des points en fonction des conditions de bord
 			//Le label est dans val[3], on peut définir ce qu'on veut
+			if (val[3] == "97"){//On set le label des points val[5] et val[6] à Dirichlet
+				if (att_pointList[stoi(val[5])-1]->setBorderType(BORDER_DIRICHLET_COLD))
+					decreaseDdlFromPoint(stoi(val[5]) - 1);
+				if (att_pointList[stoi(val[6])-1]->setBorderType(BORDER_DIRICHLET_COLD))
+					decreaseDdlFromPoint(stoi(val[6]) - 1);
+			}
 			if (val[3] == "98"){//On set le label des points val[5] et val[6] à Dirichlet
 				if (att_pointList[stoi(val[5])-1]->setBorderType(BORDER_DIRICHLET_HOT))
 					decreaseDdlFromPoint(stoi(val[5]) - 1);
