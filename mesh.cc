@@ -6,12 +6,15 @@
 /*
 double f(double x, double y) {
 	return 2 * M_PI * M_PI * sin(M_PI * x) * sin(M_PI * y);
-}
-*/
+}*/
 
+/*
 double f(double x, double y) {
 	return 2 * M_PI * M_PI * sin(M_PI * x) * cos(M_PI * y);
-}
+}*/
+
+
+double f(double x, double y) {x==x; y==y; return 20;}
 
 std :: vector<std :: string> split (const std :: string &s, char delim) {
     std::vector<std::string> result;
@@ -121,7 +124,7 @@ void Mesh :: solve() {
 	solver.compute(*att_A);
 	*att_X = solver.solve(*att_F);
 	std :: cout << "Solved";
-//	std :: cout << ". X = " << *att_X;
+	std :: cout << ". X = " << *att_X;
 	std :: cout << std :: endl;
 }
 
