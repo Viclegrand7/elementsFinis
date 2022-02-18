@@ -14,7 +14,7 @@ double f(double x, double y) {
 }*/
 
 
-double f(double x, double y) {x==x; y==y; return 20;}
+double f(double x, double y) {return 0;}
 
 std :: vector<std :: string> split (const std :: string &s, char delim) {
     std::vector<std::string> result;
@@ -94,10 +94,14 @@ void Mesh :: assemble() {
 				if (J == -1) {
 					std :: vector<double> first((*triangle)->gradPhi(i));
 					std :: vector<double> second((*triangle)->gradPhi(j));
+					std :: cout << (int) (**triangle)[j]->borderType() << std :: endl;
 					if ((**triangle)[j]->borderType() == BORDER_DIRICHLET_COLD)
 						(*att_F)(I) -= dirichlet_cold_condition * (*triangle)->getSurface() * std :: inner_product(first.begin(), first.end(), second.begin(), 0);
-					else
+					else {
+						if ((**triangle)[j]->borderType() == BORDER_DIRICHLET_HOT)
+							std :: cout << "YO AM I LYING BRO" << std :: endl;
 						(*att_F)(I) -= dirichlet_hot_condition * (*triangle)->getSurface() * std :: inner_product(first.begin(), first.end(), second.begin(), 0);
+					}
 					continue;
 				}
 				std :: vector<double> first((*triangle)->gradPhi(i));
@@ -124,7 +128,7 @@ void Mesh :: solve() {
 	solver.compute(*att_A);
 	*att_X = solver.solve(*att_F);
 	std :: cout << "Solved";
-	std :: cout << ". X = " << *att_X;
+//	std :: cout << ". X = " << *att_X;
 	std :: cout << std :: endl;
 }
 
