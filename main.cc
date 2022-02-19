@@ -9,17 +9,22 @@ long long Point :: globalId;
 long long Point :: globalDdl;
 
 
+double f(double x, double y) {
+	return 0.;
+}
 
+double realSolutionSquare(double x, double y) {return 0.;} //Useless but needed
 
 
 
 int main() {
 	Point :: resetGlobals();
-	Mesh mesh("final_2.msh");
+	Mesh mesh("simple_mesh.msh");
 	mesh.test();
 	mesh.assemble();
 	mesh.solve();
-	mesh.GNUPlotExport("test.dat");
+//	std :: cout << "Error: " << mesh.computeError() << std :: endl;
+	mesh.GNUPlotExport("final.dat");
 	mesh.ParaviewExport("final.txt");
 
 }

@@ -1,4 +1,4 @@
-h = 0.01;                     // Characteristic length of a mesh element
+h = 0.0001;                     // Characteristic length of a mesh element
 
 Point(1) = {0, 0, 0, h};
 

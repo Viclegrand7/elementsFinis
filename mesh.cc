@@ -1,20 +1,9 @@
 #include "mesh.hh"
 
-#define dirichlet_hot_condition 24
-#define dirichlet_cold_condition 5
+#define dirichlet_hot_condition 0
+#define dirichlet_cold_condition 0
 
-/*
-double f(double x, double y) {
-	return 2 * M_PI * M_PI * sin(M_PI * x) * sin(M_PI * y);
-}*/
-
-/*
-double f(double x, double y) {
-	return 2 * M_PI * M_PI * sin(M_PI * x) * cos(M_PI * y);
-}*/
-
-
-double f(double x, double y) {return 0;}
+double f(double x, double y);
 
 std :: vector<std :: string> split (const std :: string &s, char delim) {
     std::vector<std::string> result;
@@ -94,19 +83,15 @@ void Mesh :: assemble() {
 				if (J == -1) {
 					std :: vector<double> first((*triangle)->gradPhi(i));
 					std :: vector<double> second((*triangle)->gradPhi(j));
-					std :: cout << (int) (**triangle)[j]->borderType() << std :: endl;
 					if ((**triangle)[j]->borderType() == BORDER_DIRICHLET_COLD)
 						(*att_F)(I) -= dirichlet_cold_condition * (*triangle)->getSurface() * std :: inner_product(first.begin(), first.end(), second.begin(), 0);
-					else {
-						if ((**triangle)[j]->borderType() == BORDER_DIRICHLET_HOT)
-							std :: cout << "YO AM I LYING BRO" << std :: endl;
+					else
 						(*att_F)(I) -= dirichlet_hot_condition * (*triangle)->getSurface() * std :: inner_product(first.begin(), first.end(), second.begin(), 0);
-					}
 					continue;
 				}
 				std :: vector<double> first((*triangle)->gradPhi(i));
 				std :: vector<double> second((*triangle)->gradPhi(j));
-				contributions.push_back(Eigen :: Triplet<double>((**triangle)[i]->getDdl(), (**triangle)[j]->getDdl(), (*triangle)->getSurface() * std :: inner_product(first.begin(), first.end(), second.begin(), 0)));
+				contributions.push_back(Eigen :: Triplet<double>(I, J, (*triangle)->getSurface() * std :: inner_product(first.begin(), first.end(), second.begin(), 0)));
 //				std :: cout << (**triangle)[i]->getDdl() << '\t' << (**triangle)[j]->getDdl() << "\t\t" << std :: inner_product(first.begin(), first.end(), second.begin(), 0) << std :: endl;
 			}
 		}
@@ -232,14 +217,8 @@ void Mesh :: decreaseDdlFromPoint(unsigned int figure) {
 	for (++figure; figure < att_pointList.size() ; ++figure)
 		att_pointList[figure]->decreaseDdl();
 }
-/*
-double realSolutionSquare(double x, double y) {
-	return sin(M_PI * x) * sin(M_PI * y);
-}
-*/
-double realSolutionSquare(double x, double y) {
-	return sin(M_PI * x) * cos(M_PI * y);
-}
+
+double realSolutionSquare(double x, double y);
 
 double Mesh :: computeError() {
 	double squaredError(0.);
